@@ -17,9 +17,7 @@ class Account extends Entity {
       //url: 'http://localhost:8000', // адрес
       url: this.URL + id, // адрес
       method: 'get', // метод запроса
-      callback(err, resp) {
-        callback(err, resp);
-      },
+      callback,
 
     })
 

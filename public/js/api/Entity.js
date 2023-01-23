@@ -12,9 +12,16 @@ class Entity {
    * (в зависимости от того, что наследуется от Entity)
    * */
   static list(data = {}, callback) {
+    let newUrl = this.URL;
+    if (this.URL === "/transaction") {
+      newUrl = this.URL + "?account_id=" + data.account_id;
+    }
+    if (this.URL === "/account") {
+      newUrl = this.URL + data;
+    }
 
     createRequest({
-      url: this.URL,
+      url: newUrl,
       data: data,
       method: "GET",
       callback: callback,
@@ -41,9 +48,17 @@ class Entity {
    * */
   static remove(data, callback) {
 
+    let formData = new FormData;
+    for (const iterator in data) {
+      formData.append(`${iterator}`, `${data[iterator]}`);
+    }
+
+
+    //formData.append( 'password', 'odinodin'  );
+
     createRequest({
       url: this.URL,
-      data: data,
+      data: formData,
       method: "DELETE",
       callback: callback,
     });

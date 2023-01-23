@@ -19,18 +19,16 @@ class CreateTransactionForm extends AsyncForm {
   renderAccountsList() {
     let currUser = User.current();
     let accWidget = this.element.querySelector("select");
-    //const selectList = document.getElementById("expense-accounts-list");
     if (currUser) {
       Account.list(currUser.id, function (err, resp) {
         if (resp && resp.success) {
+          accWidget.options.length = 0;
+
           for (let index = 0; index < resp.data.length; index++) {
             const element = resp.data[index];
             let newOption = new Option(element.name, element.id);
             accWidget.options[accWidget.options.length] = newOption;
           }
-        }
-        if (resp && !resp.success) {
-          console.log(resp.data);
         }
         if (err) {
           console.log("Ошибка получения счётов");
@@ -47,15 +45,17 @@ class CreateTransactionForm extends AsyncForm {
    * в котором находится форма
    * */
   onSubmit(data) {
-    let currentForm = this.element;
-    Transaction.create(data, function (err, resp) {
+
+    Transaction.create(data, (err, resp) => {
       if (resp && resp.success) {
-        currentForm.reset();
-        App.getModal('createAccount').close();
+        this.element.reset();
         App.update();
-      }
-      if (resp && !resp.success) {
-        console.log(resp.data);
+        if (this.element.id === "new-expense-form") {
+          App.getModal('newExpense').close();
+        }
+        if (this.element.id === "new-income-form") {
+          App.getModal('newIncome').close();
+        }
       }
       if (err) {
         console.log("Ошибка получения счётов");

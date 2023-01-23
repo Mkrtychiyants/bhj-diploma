@@ -34,15 +34,19 @@ class AccountsWidget {
   registerEvents() {
     const createAcc = document.querySelector(".create-account");
     const existedAccsParent = document.querySelector("ul.accounts-panel");
-    const thisWidjet = this;
-    createAcc.addEventListener("click", function (e) {
+
+    createAcc.addEventListener("click", (e) => {
       App.getModal("createAccount").open();
       e.preventDefault();
     });
 
-    existedAccsParent.addEventListener("click", function (e) {
-      const selectedAcc = e.target.closest("li");
-      thisWidjet.onSelectAccount(selectedAcc);
+    existedAccsParent.addEventListener("click", (e) => {
+      const selectedAcc = e.target.closest("li.account");
+      if (selectedAcc) {
+        this.onSelectAccount(selectedAcc);
+        e.preventDefault();
+      }
+
     })
 
   }
@@ -59,19 +63,15 @@ class AccountsWidget {
    * */
   update() {
     let currUser = User.current();
-    let accWidget = this;
+
     if (currUser) {
-      Account.list(currUser.id, function (err, resp) {
+      Account.list(currUser.id, (err, resp) => {
         if (resp && resp.success) {
-          accWidget.clear();
+          this.clear();
           for (let index = 0; index < resp.data.length; index++) {
             const element = resp.data[index];
-            accWidget.renderItem(element);
+            this.renderItem(element);
           }
-
-        }
-        if (resp && !resp.success) {
-          console.log(resp.data);
         }
         if (err) {
           console.log("Ошибка получения счётов");
@@ -109,13 +109,6 @@ class AccountsWidget {
     }
     element.classList.add("active");
     App.showPage('transactions', { account_id: element.dataset.id });
-    //   Account.get(User.current().id, (err,resp)=>{
-    //     if (resp && resp.success) {
-    //       App.showPage('transactions', { account_id: resp.data.id });
-    //     }
-
-    // })
-
   }
 
   /**
@@ -128,21 +121,11 @@ class AccountsWidget {
     const newLi = document.createElement("li");
     newLi.classList.add("account");
     newLi.dataset.id = item.id;
-    const newA = document.createElement("a");
-    newA.href = "#";
-    const newSpan = document.createElement("span");
-    newSpan.textContent = item.name + " / ";
-
-    const newSpan2 = document.createElement("span");
-    newSpan2.textContent = item.sum + " ₽";
-    newA.appendChild(newSpan);
-    newA.appendChild(newSpan2);
-    newLi.appendChild(newA);
-    const newDocFragment = new DocumentFragment();
-    newDocFragment.appendChild(newLi);
-
-    return newDocFragment;
-
+    newLi.insertAdjacentHTML("afterbegin", `<a href="#">
+      <span>${item.name}</span> /
+      <span>${item.sum} ₽</span>
+      </a>`)
+    return newLi;
   }
 
   /**
@@ -152,6 +135,7 @@ class AccountsWidget {
    * и добавляет его внутрь элемента виджета
    * */
   renderItem(data) {
+
     this.element.appendChild(this.getAccountHTML(data));
   }
 }

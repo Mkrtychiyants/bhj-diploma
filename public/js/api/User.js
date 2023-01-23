@@ -26,16 +26,7 @@ class User {
    * из локального хранилища
    * */
   static current() {
-    if (localStorage.user) {
-      try {
-        return JSON.parse(localStorage.user);
-      } catch (error) {
-        return null;
-      }
-
-    } else {
-      return undefined
-    }
+    return JSON.parse(localStorage.getItem('user'));
   }
   /**
    * Получает информацию о текущем
@@ -45,19 +36,19 @@ class User {
 
     createRequest({
       //url: 'http://localhost:8000', // адрес
-      url: '/user/current', // адрес
-      method: 'get', // метод запроса
+      url: this.URL + '/current', // адрес
+      method: 'GET', // метод запроса
       /*
         Функция, которая сработает после запроса.
         Если в процессе запроса произойдёт ошибка, её объект
         должен быть в параметре err.
         Если в запросе есть данные, они должны быть переданы в response.
       */
-      callback(err, resp) {
+      callback: (err, resp) => {
         if (resp && resp.user) {
-          User.setCurrent(resp.user);
+          this.setCurrent(resp.user);
         } if (resp && !resp.success) {
-          User.unsetCurrent();
+          this.unsetCurrent();
         } else if (err) {
           console.log("Callback err " + err)
         }
@@ -75,16 +66,12 @@ class User {
    * */
   static login(data, callback) {
     createRequest({
-      url: User.URL + '/login',
+      url: this.URL + '/login',
       method: 'POST',
-      // responseType: 'json',
       data,
       callback: (err, resp) => {
         if (resp && resp.user) {
           this.setCurrent(resp.user);
-        }
-        if (resp && !resp.success) {
-          alert(resp.error);
         }
         if (err) {
           alert("callback err", err)
@@ -102,7 +89,7 @@ class User {
   static register(data, callback) {
     createRequest({
       //url: 'http://localhost:8000', // адрес
-      url: '/user/register', // адрес
+      url: this.URL + '/register', // адрес
       data: data,
       method: 'POST', // метод запроса
       /*
@@ -114,11 +101,8 @@ class User {
       callback: (err, resp) => {
         if (resp && resp.user) {
           this.setCurrent(resp.user);
-          console.log("reg.success: ");
-          console.log(resp.success);
-        } if (!resp.success) {
-          console.log("resp.success:" + resp.success);
-        } else {
+        } 
+         else {
           console.log('Callback err: ', err);
         };
         callback(err, resp);
@@ -138,9 +122,6 @@ class User {
 
         if (resp && resp.success) {
           this.unsetCurrent();
-        }
-        if (!resp.success) {
-          alert("callback err", err)
         }
         callback(err, resp);
       }
